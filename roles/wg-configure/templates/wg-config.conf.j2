@@ -1,0 +1,9 @@
+{% block server %}
+[Interface]
+Address = {{ wireguard_address }}/{{ wireguard_mask }}
+PrivateKey = 
+DNS = {{ wireguard_dns }}
+MTU = {{ wireguard_mtu }}
+{% endblock %}
+
+{% block peers %}{% endblock %}

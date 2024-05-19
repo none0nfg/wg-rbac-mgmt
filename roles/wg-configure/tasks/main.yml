@@ -1,0 +1,27 @@
+- name: Install wireguard package
+  apt:
+    name: wireguard
+    state: present
+  tags: wg-install
+  become: true
+
+- name: Configure sysctl
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+  tags: wg-install
+  become: true
+
+- name: Ensure directory facts.d exists
+  file:
+    state: directory
+    owner: root
+    group: root
+    path: /etc/ansible/facts.d 
+    recurse: true
+  become: true
+
+- name: Configure wireguard server
+  include_tasks: server.yml
+  tags: wg-configure

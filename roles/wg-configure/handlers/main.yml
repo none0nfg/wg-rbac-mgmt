@@ -1,0 +1,13 @@
+- name: restart_wg
+  ansible.builtin.service:
+    name: wg-quick@{{ wireguard_if_name }}
+    state: restarted
+
+- name: reload_local_facts
+  setup:
+    filter: ansible_local
+
+- name: update_local_facts
+  copy:
+    dest: /etc/ansible/facts.d/wg.fact
+    content: "{{ ansible_facts.ansible_local | to_json }}"
