@@ -1,43 +1,47 @@
-- name: Facts
-  debug:
-    var: ansible_facts.ansible_local
-
 - name: Generate servers's privkey if not exists
   shell: wg genkey
   register: server_privkey
-  when: ansible_facts.ansible_local.interface.privkey is undefined
+  when: ansible_facts.ansible_local.wg.interfaces.privkey is undefined
 
 - name: Save privkey
   set_fact:
-    ansible_facts:
-      ansible_local:
-        interface:
-          privkey: "{{ server_privkey.stdout }}"
-  when: ansible_facts.ansible_local.interface.privkey is undefined
+    ansible_local: "{{ ansible_local | combine({'wg': {'interfaces': {'privkey': server_privkey.stdout }}}, recursive=True) }}"
+  when: ansible_facts.ansible_local.wg.interfaces.privkey is undefined
+  changed_when: server_privkey is defined
   notify:
     - update_local_facts
     - reload_local_facts
 
-- name: Facts
-  debug:
-    var: ansible_facts.ansible_local
+- name: Flush handlers
+  meta: flush_handlers
 
 - name: Generate servers's pubkey if not exists
-  shell: "echo {{ server_privkey.stdout }} | wg pubkey"
+  shell: "echo {{ ansible_facts.ansible_local.wg.interfaces.privkey }} | wg pubkey"
   register: server_pubkey
-  when: ansible_facts.ansible_local.interface.pubkey is undefined
+  when: ansible_facts.ansible_local.wg.interfaces.pubkey is undefined
 
 - name: Save pubkey
   set_fact:
-    ansible_facts:
-      ansible_local:
-        interface:
-          pubkey: "{{ server_pubkey.stdout }}"
-  when: ansible_facts.ansible_local.interface.pubkey is undefined
+    ansible_local: "{{ ansible_local | combine({'wg': {'interfaces': {'pubkey': server_pubkey.stdout }}}, recursive=True) }}"
+  when: ansible_facts.ansible_local.wg.interfaces.pubkey is undefined
+  changed_when: server_pubkey is defined
   notify:
     - update_local_facts
     - reload_local_facts
 
-- name: Debug
-  debug:
-    var: ansible_facts.ansible_local | to_json
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Generate Users
+  include_tasks: peers.yml
+  loop: "{{ members }}" 
+
+
+- name: Generate Wireguard Config
+  template:
+    src: wg-config.conf.j2
+    dest: /etc/wireguard/{{ wireguard_if_name }}.conf
+  # notify:
+  #   - restart_wg
+
+  

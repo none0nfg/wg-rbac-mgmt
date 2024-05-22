@@ -1,9 +1,12 @@
-{% block server %}
 [Interface]
 Address = {{ wireguard_address }}/{{ wireguard_mask }}
-PrivateKey = 
+PrivateKey = {{ ansible_facts.ansible_local.wg.interfaces.privkey }}
 DNS = {{ wireguard_dns }}
 MTU = {{ wireguard_mtu }}
-{% endblock %}
 
-{% block peers %}{% endblock %}
+{% for user in ansible_facts.ansible_local.wg.peers  %}
+[Peer]
+PublicKey = {{ ansible_facts.ansible_local.wg.peers[user].pubkey }}
+AllowedIPs = 0.0.0.0/0
+
+{% endfor %}

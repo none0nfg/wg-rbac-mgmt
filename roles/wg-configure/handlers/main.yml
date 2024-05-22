@@ -10,4 +10,4 @@
 - name: update_local_facts
   copy:
     dest: /etc/ansible/facts.d/wg.fact
-    content: "{{ ansible_facts.ansible_local | to_json }}"
+    content: "{{ ansible_local.wg | to_json }}"

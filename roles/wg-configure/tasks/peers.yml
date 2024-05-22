@@ -1,0 +1,33 @@
+- name: Generate {{ item }} peer's privkey if not exists
+  shell: wg genkey
+  register: peer_privkey
+  when: ansible_facts.ansible_local.wg.peers[item].privkey is undefined
+
+- name: Save privkey
+  set_fact:
+    ansible_local: "{{ ansible_local | combine({'wg': {'peers': { item: {'privkey': peer_privkey.stdout }}}}, recursive=True) }}"
+  when: ansible_facts.ansible_local.wg.peers[item].privkey is undefined
+  changed_when: peer_privkey is defined
+  notify:
+    - update_local_facts
+    - reload_local_facts
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Generate {{ item }} peer's pubkey if not exists
+  shell: "echo {{ ansible_facts.ansible_local.wg.peers[item].privkey }} | wg pubkey"
+  register: peer_pubkey
+  when: ansible_facts.ansible_local.wg.peers[item].pubkey is undefined
+
+- name: Save pubkey
+  set_fact:
+    ansible_local: "{{ ansible_local | combine({'wg': {'peers': { item: {'pubkey': peer_pubkey.stdout }}}}, recursive=True) }}"
+  when: ansible_facts.ansible_local.wg.peers[item].pubkey is undefined
+  changed_when: peer_pubkey is defined
+  notify:
+    - update_local_facts
+    - reload_local_facts
+
+- name: Flush handlers
+  meta: flush_handlers
