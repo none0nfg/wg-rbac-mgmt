@@ -29,6 +29,15 @@
     - update_local_facts
     - reload_local_facts
 
+- name: Set next usable ip for peers, if unset
+  set_fact:
+    ansible_local: "{{ ansible_local | combine({'wg': {'interfaces': {'nextUsable': (wireguard_interface_address | ansible.utils.ipaddr('next_usable')) + '/' + (wireguard_netmask | string ) }}}, recursive=True) }}"
+  when: ansible_facts.ansible_local.wg.interfaces.nextUsable is undefined
+  changed_when: server_pubkey is defined # Just to run at first time
+  notify:
+    - update_local_facts
+    - reload_local_facts
+
 - name: Flush handlers
   meta: flush_handlers
 

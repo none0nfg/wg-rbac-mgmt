@@ -22,6 +22,16 @@
     recurse: true
   become: true
 
+- name: Ensure file wg.fact exists
+  file:
+    state: touch
+    owner: root
+    group: root
+    modification_time: preserve
+    access_time: preserve
+    path: /etc/ansible/facts.d/wg.fact
+  become: true
+
 - name: Configure wireguard server
   include_tasks: server.yml
   tags: wg-configure

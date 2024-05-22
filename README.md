@@ -13,3 +13,4 @@ Role to manage wireguard instance, provides opportunity to manage users, groups,
 * Clients deletion
 * IP Address asssignment to clients
 * IPtables management
+* Config distribution

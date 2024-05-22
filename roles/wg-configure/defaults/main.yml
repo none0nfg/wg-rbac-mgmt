@@ -1,7 +1,7 @@
 wireguard_mtu: 1420
-wireguard_address: 10.200.200.1
-wireguard_network: 10.200.200.0
-wireguard_mask: 24
+wireguard_netaddr: 10.200.200.0
+wireguard_netmask: 24
+wireguard_interface_address: "{{ wireguard_netaddr | ansible.utils.ipsubnet(wireguard_netmask) | ansible.utils.ipaddr('next_usable') }}/{{ wireguard_netmask }}"
 wiregurad_if_name: wg0
 
 networks: {}

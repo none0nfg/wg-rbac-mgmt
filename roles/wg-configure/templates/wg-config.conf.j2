@@ -1,5 +1,5 @@
 [Interface]
-Address = {{ wireguard_address }}/{{ wireguard_mask }}
+Address = {{ wireguard_interface_address }}
 PrivateKey = {{ ansible_facts.ansible_local.wg.interfaces.privkey }}
 DNS = {{ wireguard_dns }}
 MTU = {{ wireguard_mtu }}
@@ -7,6 +7,6 @@ MTU = {{ wireguard_mtu }}
 {% for user in ansible_facts.ansible_local.wg.peers  %}
 [Peer]
 PublicKey = {{ ansible_facts.ansible_local.wg.peers[user].pubkey }}
-AllowedIPs = 0.0.0.0/0
+AllowedIPs = {{ ansible_facts.ansible_local.wg.peers[user].address }}
 
 {% endfor %}

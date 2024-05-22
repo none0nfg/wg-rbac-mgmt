@@ -31,3 +31,22 @@
 
 - name: Flush handlers
   meta: flush_handlers
+
+- name: Assign IP Address
+  set_fact:
+    ansible_local: "{{ ansible_local | combine({'wg': {'peers': { item: {'address': ansible_facts.ansible_local.wg.interfaces.nextUsable }}}}, recursive=True) }}"
+  when: ansible_facts.ansible_local.wg.peers[item].address is undefined
+  changed_when: ansible_facts.ansible_local.wg.peers[item].address is undefined
+  notify:
+    - update_local_facts
+    - reload_local_facts
+
+- name: Move Next Usable
+  set_fact:
+    ansible_local: "{{ ansible_local | combine({'wg': {'interfaces': { 'nextUsable': (ansible_facts.ansible_local.wg.interfaces.nextUsable | ansible.utils.ipaddr('next_usable')) + '/' + (wireguard_netmask | string ) }}}, recursive=True) }}"
+  notify:
+    - update_local_facts
+    - reload_local_facts
+
+- name: Flush handlers
+  meta: flush_handlers
